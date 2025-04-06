@@ -59,16 +59,27 @@ enum List[A]:
   def reverse(): List[A] = foldLeft[List[A]](Nil())((l, e) => e :: l)
 
   /** EXERCISES */
-  def zipRight: List[(A, Int)] = ???
+  def zipRight: List[(A, Int)] = foldRight(Nil())((elem, acc) => (elem, acc match
+    case Nil() => length - 1
+    case (_, acc) :: _  => acc - 1) :: acc
+  )
 
-  def partition(pred: A => Boolean): (List[A], List[A]) = ???
+  def partition(pred: A => Boolean): (List[A], List[A]) = foldRight((Nil(), Nil()))((elem, acc) =>
+    if pred(elem) then (elem :: acc._1, acc._2) else (acc._1, elem :: acc._2)
+  )
 
-  def span(pred: A => Boolean): (List[A], List[A]) = ???
+  def span(pred: A => Boolean): (List[A], List[A]) = foldLeft((Nil(), Nil()))((acc, elem) =>
+    if pred(elem) && acc._2.isEmpty  then (acc._1.append(elem :: Nil()), Nil()) else (acc._1, acc._2.append(elem :: Nil()))
+  )
 
   /** @throws UnsupportedOperationException if the list is empty */
-  def reduce(op: (A, A) => A): A = ???
+  def reduce(op: (A, A) => A): A = this match
+    case Nil() => throw UnsupportedOperationException()
+    case h :: t => t.foldLeft(h)(op)
 
-  def takeRight(n: Int): List[A] = ???
+  def takeRight(n: Int): List[A] = foldRight((0, Nil[A]()))((elem, acc) =>
+    if acc._1 < n then (acc._1 + 1, elem :: acc._2) else acc
+  )._2
 
 // Factories
 object List:
